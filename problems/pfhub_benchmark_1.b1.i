@@ -61,10 +61,11 @@
 []
 
 [BCs]
-  [./Periodic]
-    [./All]
-      auto_direction = 'x y'
-    [../]
+  [./flux]
+    type = NeumannBC
+    variable = c
+    value = 0
+    boundary = '0 1 2 3'
   [../]
 []
 
@@ -101,6 +102,13 @@
   [./dt]
     type = TimestepSize
     outputs = 'csv console'
+  [../]
+  [./flux]
+    type = SideDiffusiveFluxIntegral
+    variable = c
+    diffusivity = M
+    outputs = 'csv console'
+    boundary = '0 1 2 3'
   [../]
 []
 
@@ -157,7 +165,7 @@
   nl_abs_tol = 1e-10
   normalize_solution_diff_norm_by_dt = true
   steady_state_detection = true
-  #num_steps = 1
+  #num_steps = 10
   
   start_time = 0.0
   end_time   = 1000000
@@ -165,8 +173,8 @@
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
-    cutback_factor = 0.5
-    growth_factor = 1.5
+    cutback_factor = 0.75
+    growth_factor = 1.25
     optimal_iterations = 8
     iteration_window = 2
   [../]
@@ -178,11 +186,13 @@
 
 [Outputs]
   perf_graph = true
+  print_linear_residuals = false
   [./console]
     type = Console
   [../]
   [./exodus]
     type = Exodus
+    interval = 100
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./csv]
