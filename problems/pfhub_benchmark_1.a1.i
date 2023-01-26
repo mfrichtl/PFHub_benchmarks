@@ -139,7 +139,7 @@
     [./grad_c]
       type = ValueThresholdMarker
       variable = jump_c
-      coarsen = 3e-16
+      coarsen = 5e-16
       refine = 5e-15
       invert = false
       third_state = DONT_MARK
@@ -168,11 +168,11 @@
   #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   #petsc_options_value = 'hypre boomeramg 31'
   
-  l_max_its = 200
+  l_max_its = 50
   l_abs_tol = 1e-10
   nl_max_its = 15
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-12
   normalize_solution_diff_norm_by_dt = true
   steady_state_detection = true
   #num_steps = 1000
