@@ -2,15 +2,13 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 200
-  ny = 200
+  nx = 50
+  ny = 50
   nz = 0
-  xmin = 0
-  xmax = 199
-  ymin = 0
-  ymax = 199
+  xmax = 200
+  ymax = 200
   elem_type = QUAD4
-  uniform_refine = 0
+  uniform_refine = 1
 []
 
 [GlobalParams]
@@ -18,12 +16,23 @@
 []
 
 [AuxVariables]
+  [./free_energy]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [Functions]
 []
 
 [AuxKernels]
+  [./free_energy]
+    type = TotalFreeEnergy
+    variable = free_energy
+    f_name = F
+    interfacial_vars = c
+    kappa_names = kappa_c
+  [../]
 []
 
 [Variables]
@@ -61,9 +70,15 @@
 []
 
 [BCs]
-  [./flux]
+  [./c_flux]
     type = NeumannBC
     variable = c
+    value = 0
+    boundary = '0 1 2 3'
+  [../]
+  [./w_flux]
+    type = NeumannBC
+    variable = w
     value = 0
     boundary = '0 1 2 3'
   [../]
@@ -93,9 +108,15 @@
 []
 
 [Postprocessors]
-  [./total_energy]
+  [./bulk_energy]
     type = ElementIntegralMaterialProperty
     mat_prop = F
+    outputs = 'csv console'
+    execute_on = 'INITIAL TIMESTEP_END'
+  [../]
+  [./total_energy]
+    type = ElementIntegralVariablePostprocessor
+    variable = free_energy
     outputs = 'csv console'
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
@@ -127,27 +148,6 @@
   [../]
 []
 
-# [Adaptivity]
-#   [./Markers]
-#     [./grad_c]
-#       type = ValueThresholdMarker
-#       variable = jump_c
-#       coarsen = 0.001
-#       refine = 0.01
-#       third_state = DO_NOTHING
-#     [../]
-#   [../]
-#   [./Indicators]
-#     [./jump_c]
-#       type = GradientJumpIndicator
-#       variable = c
-#     [../]
-#   [../]
-#   marker = grad_c
-#   cycles_per_step = 1
-#   recompute_markers_during_cycles = true
-# []
-
 [Executioner]
   type = Transient
   scheme = 'bdf2'
@@ -159,10 +159,11 @@
   #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   #petsc_options_value = 'hypre boomeramg 31'
   
-  l_max_its = 25
+  l_max_its = 50
+  l_abs_tol = 1e-10
   nl_max_its = 15
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-12
   normalize_solution_diff_norm_by_dt = true
   steady_state_detection = true
   #num_steps = 10
@@ -170,13 +171,22 @@
   start_time = 0.0
   end_time   = 1000000
 
+  [./Adaptivity]
+    initial_adaptivity = 1
+    max_h_level = 2
+    interval = 1
+    refine_fraction = 0.9
+    coarsen_fraction = 0.1
+  [../]
+
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
-    cutback_factor = 0.75
-    growth_factor = 1.25
+    cutback_factor = 0.95
+    growth_factor = 1.05
     optimal_iterations = 8
     iteration_window = 2
+    #linear_iteration_ratio = 100
   [../]
 []
 
@@ -192,7 +202,7 @@
   [../]
   [./exodus]
     type = Exodus
-    interval = 100
+    interval = 50
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./csv]
