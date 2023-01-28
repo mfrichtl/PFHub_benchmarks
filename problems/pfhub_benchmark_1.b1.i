@@ -165,18 +165,21 @@
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-12
   normalize_solution_diff_norm_by_dt = true
+  steady_state_tolerance = 1e-06
   steady_state_detection = true
+  line_search = none
   #num_steps = 10
   
   start_time = 0.0
   end_time   = 1000000
+  dtmin = 1e-6
 
   [./Adaptivity]
     initial_adaptivity = 1
     max_h_level = 2
     interval = 1
-    refine_fraction = 0.9
-    coarsen_fraction = 0.1
+    refine_fraction = 0.85
+    coarsen_fraction = 0.15
   [../]
 
   [./TimeStepper]
@@ -195,7 +198,6 @@
 []
 
 [Outputs]
-  perf_graph = true
   print_linear_residuals = false
   [./console]
     type = Console
@@ -207,5 +209,9 @@
   [../]
   [./csv]
     type = CSV
+  [../]
+  [./pgraph]
+    type = PerfGraphOutput
+    execute_on = 'FINAL FAILED'
   [../]
 []
