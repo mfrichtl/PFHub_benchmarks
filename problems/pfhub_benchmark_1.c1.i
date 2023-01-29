@@ -8,17 +8,27 @@
 []
 
 [GlobalParams]
-  outputs = 'exodus console csv'
-  derivative_order = 2
+  outputs = 'exodus console csv pgraph'
 []
 
 [AuxVariables]
+  [./free_energy]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [Functions]
 []
 
 [AuxKernels]
+  [./free_energy]
+    type = TotalFreeEnergy
+    variable = free_energy
+    f_name = F
+    interfacial_vars = c
+    kappa_names = kappa_c
+  [../]
 []
 
 [Variables]
@@ -56,11 +66,17 @@
 []
 
 [BCs]
-  [./no_flux]
+  [./c_flux]
     type = NeumannBC
     variable = c
     value = 0
-    boundary = 0
+    boundary = '0'
+  [../]
+  [./w_flux]
+    type = NeumannBC
+    variable = w
+    value = 0
+    boundary = '0'
   [../]
 []
 
@@ -79,6 +95,7 @@
     constant_expressions = '5     0.3     0.7'
     outputs = 'exodus'
     property_name = F
+    derivative_order = 2
   [../]
 []
 
@@ -87,9 +104,15 @@
 []
 
 [Postprocessors]
-  [./total_energy]
+  [./bulk_energy]
     type = ElementIntegralMaterialProperty
     mat_prop = F
+    outputs = 'csv console'
+    execute_on = 'INITIAL TIMESTEP_END'
+  [../]
+  [./total_energy]
+    type = ElementIntegralVariablePostprocessor
+    variable = free_energy
     outputs = 'csv console'
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
@@ -99,10 +122,10 @@
   [../]
   [./flux]
     type = SideDiffusiveFluxIntegral
-    boundary = 0
     variable = c
     diffusivity = M
     outputs = 'csv console'
+    boundary = '0'
   [../]
 []
 
@@ -121,56 +144,42 @@
   [../]
 []
 
-# [Adaptivity]
-#   [./Markers]
-#     [./grad_c]
-#       type = ValueThresholdMarker
-#       variable = jump_c
-#       coarsen = 0.001
-#       refine = 0.01
-#       third_state = DO_NOTHING
-#     [../]
-#   [../]
-#   [./Indicators]
-#     [./jump_c]
-#       type = GradientJumpIndicator
-#       variable = c
-#     [../]
-#   [../]
-#   marker = grad_c
-#   cycles_per_step = 1
-#   recompute_markers_during_cycles = true
-# []
-
 [Executioner]
   type = Transient
   scheme = 'bdf2'
   solve_type = 'NEWTON'
-  #petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
-  #petsc_options_value = 'asm      31                 preonly       lu           4'
-  #petsc_options_iname = '-pc_type'
-  #petsc_options_value = 'lu'
-  #petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  #petsc_options_value = 'hypre boomeramg 31'
   
-  l_max_its = 50
+  l_max_its = 100
+  l_abs_tol = 1e-10
   nl_max_its = 15
   nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-9
   normalize_solution_diff_norm_by_dt = true
+  steady_state_tolerance = 1e-06
   steady_state_detection = true
-  #num_steps = 10  # for checking
+  line_search = none
+  #num_steps = 10
   
   start_time = 0.0
   end_time   = 1000000
+  dtmin = 1e-6
+
+  # [./Adaptivity]
+  #   initial_adaptivity = 1
+  #   max_h_level = 2
+  #   interval = 1
+  #   refine_fraction = 0.85
+  #   coarsen_fraction = 0.15
+  # [../]
 
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
-    cutback_factor = 0.5
-    growth_factor = 1.5
+    cutback_factor = 0.95
+    growth_factor = 1.05
     optimal_iterations = 8
     iteration_window = 2
+    #linear_iteration_ratio = 100
   [../]
 []
 
@@ -179,16 +188,20 @@
 []
 
 [Outputs]
-  perf_graph = true
   print_linear_residuals = false
   [./console]
     type = Console
   [../]
   [./exodus]
     type = Exodus
+    interval = 1
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./csv]
     type = CSV
+  [../]
+  [./pgraph]
+    type = PerfGraphOutput
+    execute_on = 'FINAL FAILED'
   [../]
 []
