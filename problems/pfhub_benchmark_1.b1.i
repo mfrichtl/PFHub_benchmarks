@@ -8,7 +8,7 @@
   xmax = 200
   ymax = 200
   elem_type = QUAD4
-  uniform_refine = 1
+  uniform_refine = 0
 []
 
 [GlobalParams]
@@ -130,6 +130,12 @@
     diffusivity = M
     outputs = 'csv console'
     boundary = '0 1 2 3'
+  [../]
+  [./mem_usage]
+    type = MemoryUsage
+    mem_type = physical_memory
+    value_type = total
+    outputs = 'csv'
   [../]
 []
 
