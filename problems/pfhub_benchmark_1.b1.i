@@ -137,6 +137,12 @@
     value_type = total
     outputs = 'csv'
   [../]
+  [./walltime]
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
+    outputs = 'csv console'
+  [../]
 []
 
 [VectorPostprocessors]
