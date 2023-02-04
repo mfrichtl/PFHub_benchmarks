@@ -117,6 +117,18 @@
     type = TimestepSize
     outputs = 'csv console'
   [../]
+  [./walltime]
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
+    outputs = 'csv console'
+  [../]
+  [./mem_usage]
+    type = MemoryUsage
+    mem_type = physical_memory
+    value_type = total
+    outputs = 'csv console'
+  [../]
 []
 
 [VectorPostprocessors]
@@ -134,29 +146,6 @@
   [../]
 []
 
-[Adaptivity]
-  [./Markers]
-    [./grad_c]
-      type = ValueThresholdMarker
-      variable = jump_c
-      coarsen = 5e-16
-      refine = 5e-15
-      invert = false
-      third_state = DONT_MARK
-    [../]
-  [../]
-  [./Indicators]
-    [./jump_c]
-      type = ValueJumpIndicator
-      variable = c
-    [../]
-  [../]
-  marker = grad_c
-  cycles_per_step = 1
-  recompute_markers_during_cycles = false
-  max_h_level = 2
-[]
-
 [Executioner]
   type = Transient
   scheme = 'bdf2'
@@ -172,7 +161,7 @@
   l_abs_tol = 1e-10
   nl_max_its = 15
   nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-12
+  nl_abs_tol = 1e-11
   normalize_solution_diff_norm_by_dt = true
   steady_state_detection = true
   #num_steps = 1000
@@ -180,7 +169,13 @@
   start_time = 0.0
   end_time   = 1000000
 
-
+  [./Adaptivity]
+    initial_adaptivity = 1
+    max_h_level = 2
+    interval = 1
+    refine_fraction = 0.85
+    coarsen_fraction = 0.15
+  [../]
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
@@ -197,7 +192,6 @@
 []
 
 [Outputs]
-  perf_graph = true
   print_linear_residuals = false
   [./console]
     type = Console
@@ -209,5 +203,9 @@
   [../]
   [./csv]
     type = CSV
+  [../]
+  [./pgraph]
+    type = PerfGraphOutput
+    execute_on = 'FINAL FAILED'
   [../]
 []
