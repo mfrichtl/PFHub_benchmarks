@@ -127,6 +127,19 @@
     outputs = 'csv console'
     boundary = '0'
   [../]
+  [./mem_usage]
+    type = MemoryUsage
+    mem_type = physical_memory
+    value_type = total
+    mem_units = kilobytes
+    outputs = 'csv console'
+  [../]
+  [./walltime]
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
+    outputs = 'csv console'
+  [../]
 []
 
 [VectorPostprocessors]
