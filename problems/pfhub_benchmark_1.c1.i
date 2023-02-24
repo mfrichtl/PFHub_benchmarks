@@ -168,7 +168,7 @@
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-9
   normalize_solution_diff_norm_by_dt = true
-  steady_state_tolerance = 1e-06
+  #steady_state_tolerance = 1e-06
   steady_state_detection = true
   line_search = none
   #num_steps = 10
@@ -177,19 +177,19 @@
   end_time   = 1000000
   dtmin = 1e-6
 
-  # [./Adaptivity]
-  #   initial_adaptivity = 1
-  #   max_h_level = 2
-  #   interval = 1
-  #   refine_fraction = 0.85
-  #   coarsen_fraction = 0.15
-  # [../]
-
+  [./Adaptivity]
+    initial_adaptivity = 2
+    max_h_level = 2
+    interval = 1
+    refine_fraction = 0.85
+    coarsen_fraction = 0.15
+  [../]
+    
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 1
-    cutback_factor = 0.95
-    growth_factor = 1.05
+    cutback_factor = 0.75
+    growth_factor = 1.25
     optimal_iterations = 8
     iteration_window = 2
     #linear_iteration_ratio = 100
@@ -207,7 +207,7 @@
   [../]
   [./exodus]
     type = Exodus
-    interval = 1
+    interval = 50
     execute_on = 'INITIAL TIMESTEP_END'
   [../]
   [./csv]
