@@ -162,13 +162,13 @@
   scheme = 'bdf2'
   solve_type = 'NEWTON'
   
-  l_max_its = 100
+  l_max_its = 50
   l_abs_tol = 1e-10
   nl_max_its = 15
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-9
   normalize_solution_diff_norm_by_dt = true
-  #steady_state_tolerance = 1e-06
+  steady_state_tolerance = 5e-6
   steady_state_detection = true
   line_search = none
   #num_steps = 10
